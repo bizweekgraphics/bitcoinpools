@@ -45,9 +45,20 @@ font-family:BWHaasRegular
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
   <script src="js/plugins.js"></script>
+  <script src="js/charts.js"></script>
   <script src="js/main.js"></script>
 
   <script>
+
+    // breakout setup
+
+    var poolChart = timeSeriesChart()
+        .dataAccessor("values")
+        .x(function(d) { return d.date; })
+        .y(function(d) { return +d.y; })
+        .width(960);
+
+    // stacked area chart setup
 
     var margin = {top: 20, right: 100, bottom: 30, left: 50},
         width = 960 - margin.left - margin.right,
@@ -116,7 +127,6 @@ font-family:BWHaasRegular
 
       pool.append("title")
           .text(function(d) { return d.name; });
-    //      .text(function(d) { return d + ": " + percent(data[d]); });
 
       pool.append("text")
           .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
@@ -133,6 +143,18 @@ font-family:BWHaasRegular
       svg.append("g")
           .attr("class", "y axis")
           .call(yAxis);
+
+      // breakouts
+
+      var breakoutEnter = d3.selectAll("#charts-container div.breakout")
+        .data(poolstack)
+        .enter()
+        .append("div")
+        .classed("breakout", true);
+
+      breakoutEnter.append("h1").text(function(d) { return d.name; });
+
+      breakoutEnter.call(poolChart);
 
     });
 
