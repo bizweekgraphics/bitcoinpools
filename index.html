@@ -34,19 +34,7 @@ font-family:BWHaasHead75Bold
 font-family:BWHaasRegular
 -->
 
-<body class="full">
-
-  <div id="logo">
-    <a href="http://www.businessweek.com/" class="ir" id="home_link">Bloomberg Businessweek</a>
-    <h2 id="channel_name">
-      <a href="http://www.twitter.com/bizweekgraphics">Graphics</a>
-    </h2>
-  </div>
-
-  <div class="clearfix"></div>
-
-  <h3 class="hed">Graphic title</h3>
-  <p class="dek">This is dek, different from the dek you are at now. I am typing the sound of my dek and I repeating and repeating the dek dek dek TK sound of my speaking voice.</p>
+<body class="wide">
 
   <svg id="svg-canvas" class="fullscreen">
     <defs>
@@ -55,33 +43,44 @@ font-family:BWHaasRegular
         <polyline class="arrow" stroke-linejoin="bevel" points="-6.72,-6.749 0.54,0 -6.72,6.749 "/>
       </marker>
     </defs>
-
-    <!-- DEMO DRAWINGS -->
-    <circle cx="240" cy="150" r="50" fill="#000000"/>
-    <rect x="400" y="500" width="50" height="50" fill="#000000"/>
-    <!-- END DEMO DRAWINGS -->
-
   </svg>
 
-  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: compiled by Bloomberg</div>
+  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: Organ of Corti</div>
 
   <script src="js/vendor/d3.min.js"></script>
+  <script src="js/vendor/underscore-min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
   <script src="js/plugins.js"></script>
   <script src="js/main.js"></script>
 
   <script>
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // DEMO CODE // (remove at will) /////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////
 
-    // draw sample arrow from page element to cursor
-    var mouseArrow = drawArrow(d3.select("#svg-canvas"), d3.select("rect"), [300,300], 120, true);
-    $(document).on("mousemove", function(e) {
-      mouseArrow.remove();
-      mouseArrow = drawArrow(d3.select("#svg-canvas"), d3.select("rect"), [e.pageX,e.pageY], 90, true);
+    var parseDate = d3.time.format("%m/%d/%y").parse;
+
+    var stack = d3.layout.stack()
+        .values(function(d) { return d.values; });
+
+    d3.csv("data/weeklyBlockSolves.csv", function(error, data) {
+
+      data.forEach(function(d) {
+        d.date = parseDate(d.date);
+      });
+
+      var pools = _.uniq(_.pluck(data,'pool'));
+      var dates = _.uniq(_.pluck(data,'date'));
+
+      poolstack = stack(pools.map(function(d) {
+        return {
+          name: d,
+          values: _.where(data,{pool:d}).map(function(d) {
+            return { date: d.date, y: +d.percentage };
+          })
+        };
+      }));
+
     });
+
   </script>
 
 </body>
