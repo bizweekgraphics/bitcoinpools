@@ -2,6 +2,7 @@ function timeSeriesChart() {
   var margin = {top: 20, right: 20, bottom: 20, left: 20},
       width = 760,
       height = 120,
+      dataAccessor = false,
       xValue = function(d) { return d[0]; },
       yValue = function(d) { return d[1]; },
       xScale = d3.time.scale(),
@@ -12,6 +13,8 @@ function timeSeriesChart() {
 
   function chart(selection) {
     selection.each(function(data) {
+
+      if(dataAccessor) data = data[dataAccessor];
 
       // Convert data to standard representation greedily;
       // this is needed for nondeterministic accessors.
@@ -89,6 +92,12 @@ function timeSeriesChart() {
   chart.height = function(_) {
     if (!arguments.length) return height;
     height = _;
+    return chart;
+  };
+
+  chart.dataAccessor = function(_) {
+    if (!arguments.length) return dataAccessor;
+    dataAccessor = _;
     return chart;
   };
 
