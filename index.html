@@ -63,21 +63,27 @@ font-family:BWHaasRegular
 
     d3.csv("data/weeklyBlockSolves.csv", function(error, data) {
 
-      data.forEach(function(d) {
-        d.date = parseDate(d.date);
-      });
 
       var pools = _.uniq(_.pluck(data,'pool'));
       var dates = _.uniq(_.pluck(data,'date'));
 
-      poolstack = stack(pools.map(function(d) {
-        return {
-          name: d,
-          values: _.where(data,{pool:d}).map(function(d) {
-            return { date: d.date, y: +d.percentage };
+      /*dates = dates.map(function(d) { return parseDate(d); })
+      data.forEach(function(d) {
+        d.date = parseDate(d.date);
+      });*/
+
+      var thing = pools.map(function(p) {
+        var zerofill = {
+          name: p,
+          values: dates.map(function(d) {
+            var datum = _.where(data,{pool:p,date:d});
+            return { date: parseDate(d), y: datum.length>0 ? +datum[0].percentage : 0 };
           })
-        };
-      }));
+        }
+        return zerofill;
+      })
+      poolstack = stack(thing);
+      console.log(poolstack);
 
     });
 
