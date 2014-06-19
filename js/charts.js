@@ -2,19 +2,26 @@ function timeSeriesChart() {
   var margin = {top: 20, right: 20, bottom: 20, left: 20},
       width = 760,
       height = 120,
+      heightFunction = false,
       dataAccessor = false,
       xValue = function(d) { return d[0]; },
       yValue = function(d) { return d[1]; },
       xScale = d3.time.scale(),
       yScale = d3.scale.linear(),
       xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0).ticks(2),
+      yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0).ticks(2).tickFormat(d3.format(".0%")),
       area = d3.svg.area().x(X).y1(Y),
       line = d3.svg.line().x(X).y(Y);
 
   function chart(selection) {
     selection.each(function(data) {
 
+      chart.metadata = data;
       if(dataAccessor) data = data[dataAccessor];
+
+      if(heightFunction) {
+        height = heightFunction(chart.metadata);
+      }
 
       // Convert data to standard representation greedily;
       // this is needed for nondeterministic accessors.
@@ -27,9 +34,11 @@ function timeSeriesChart() {
       xScale.range([0, width - margin.left - margin.right]);
 
       // Update the y-scale.
-      if(!yScale.domain.overridden) yScale.domain([0, d3.max(chart.data, function(d) { return d[1]; })])
+      if(!yScale.domain.overridden) yScale.domain([0, d3.max(chart.data, function(d) { return d[1]; })]);
+      if(yScale.domain.function) yScale.domain(yScale.domain.function(chart.metadata));
       yScale.range([height - margin.top - margin.bottom, 0]);
-
+      yAxis.tickValues(yScale.domain());
+      
       // Select the svg element, if it exists.
       var svg = d3.select(this).selectAll("svg").data([chart.data]);
 
@@ -42,6 +51,7 @@ function timeSeriesChart() {
       gEnter.append("path").attr("class", "area");
       gEnter.append("path").attr("class", "line");
       gEnter.append("g").attr("class", "x axis");
+      gEnter.append("g").attr("class", "y axis");
 
       // Update the outer dimensions.
       svg .attr("width", width)
@@ -63,6 +73,12 @@ function timeSeriesChart() {
       g.select(".x.axis")
           .attr("transform", "translate(0," + yScale.range()[0] + ")")
           .call(xAxis);
+
+      // Update the y-axis.
+      g.select(".y.axis")
+          .attr("transform", "translate(0,0)")
+          .call(yAxis);
+
     });
   }
 
@@ -88,9 +104,13 @@ function timeSeriesChart() {
     return chart;
   };
 
-  chart.height = function(_) {
+  chart.height = function(param) {
     if (!arguments.length) return height;
-    height = _;
+    if (_.isFunction(param)) {
+      heightFunction = param;
+      return chart;
+    }
+    height = param;
     return chart;
   };
 
@@ -123,13 +143,17 @@ function timeSeriesChart() {
     return chart;
   };
 
-  chart.yDomain = function(_) {
+  chart.yDomain = function(param) {
     if(!arguments.length) return yScale.domain();
-    if (_ == "auto") {
+    if (param == "auto") {
       yScale.domain(d3.extent(chart.data, function(d) { return d[0]; }));
       return chart;
     }
-    yScale.domain(_);
+    else if (_.isFunction(param)) {
+      yScale.domain.function = param;
+      return chart;
+    }
+    yScale.domain(param);
     yScale.domain.overridden = true;
     return chart;
   };

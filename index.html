@@ -57,10 +57,24 @@ font-family:BWHaasRegular
 
     var poolChart = timeSeriesChart()
         .dataAccessor("values")
+        .margin({top: 10, right: 10, bottom: 20, left: 30})
         .x(function(d) { return d.date; })
         .y(function(d) { return +d.y; })
-        .yDomain([0,.5])
-        .width(300);
+        .yDomain(function(d) {
+            if(d.name == "DeepBit" || d.name == "BTC Guild" || d.name == "GHash.IO") {
+              return [0,.5];
+            } else {
+              return [0,.25];
+            }
+          })
+        .width(300)
+        .height(function(d) {
+            if(d.name == "DeepBit" || d.name == "BTC Guild" || d.name == "GHash.IO") {
+              return 120;
+            } else {
+              return 75;
+            }
+          });
 
     // stacked area chart setup
 
