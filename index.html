@@ -121,15 +121,26 @@ font-family:BWHaasRegular
       var pools = _.uniq(_.pluck(data,'pool'));
       var dates = _.uniq(_.pluck(data,'date'));
 
-      var poolstack = stack(pools.map(function(p) {
-        return {
+      var poolblocks = pools.map(function(p) {
+        var pool = {
           name: p,
           values: dates.map(function(d) {
             var datum = _.where(data,{pool:p,date:d});
             return { date: parseDate(d), y: datum.length>0 ? +datum[0].percentage/100 : 0 };
           })
         };
-      }));
+        pool.max = d3.max(pool.values, function(d) { return d.y; });
+        return pool;
+      });
+      poolblocks = _.sortBy(poolblocks, function(d) {
+        if(d.name=="Unknown") return 1;
+        if(d.name=="DeepBit") return -4;
+        if(d.name=="BTC Guild") return -3;
+        if(d.name=="GHash.IO") return -2;
+        //this will be between -1 and 0
+        return -d.max;
+      })
+      var poolstack = stack(poolblocks);
       console.log(poolstack);
 
       x.domain(d3.extent(dates.map(function(d) { return parseDate(d); })));
