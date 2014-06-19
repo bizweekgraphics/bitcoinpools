@@ -67,7 +67,7 @@ font-family:BWHaasRegular
               return [0,.25];
             }
           })
-        .width(300)
+        .width(315)
         .height(function(d) {
             if(d.name == "DeepBit" || d.name == "BTC Guild" || d.name == "GHash.IO") {
               return 120;
@@ -78,7 +78,7 @@ font-family:BWHaasRegular
 
     // stacked area chart setup
 
-    var margin = {top: 20, right: 80, bottom: 30, left: 35},
+    var margin = {top: 20, right: 35, bottom: 30, left: 35},
         width = 970 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -124,6 +124,7 @@ font-family:BWHaasRegular
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
+        .classed("chartarea", true)
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // appending diagonal hatch pattern
@@ -179,16 +180,6 @@ font-family:BWHaasRegular
           .attr("class", "area")
           .attr("d", function(d) { return area(d.values); });
 
-      pool.append("title")
-          .text(function(d) { return d.name; });
-
-      pool.append("text")
-          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-          .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
-          .attr("x", 3)
-          .attr("dy", ".35em")
-          .text(function(d) { return d.name; });
-
       svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
@@ -201,6 +192,22 @@ font-family:BWHaasRegular
       svg.append("g")
           .attr("class", "gridlines")
           .call(gridlines);
+
+      var tooltip = d3.select("#stacked-area")
+        .append("div")
+        .classed("tooltip", true)
+        .style("display", "none");
+
+      d3.selectAll(".pool").on("mousemove", function(d, i) {
+        tooltip
+          .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
+          .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
+          .style("display", "block")
+          .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
+      });
+      d3.select(".chartarea").on("mouseout", function() {
+        tooltip.style("display", "none");
+      })
 
       // breakouts
 

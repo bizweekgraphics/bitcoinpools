@@ -248,7 +248,7 @@ path.arrow, polyline.arrow {
 }
 
 .small-multiple {
-  width: 300px;
+  width: 315px;
   float: left;
 }
 
@@ -285,4 +285,15 @@ path.arrow, polyline.arrow {
 
 [data-pool="Unknown"] .area {
   fill: url(#diagonalHatch);
+}
+
+.tooltip {
+  pointer-events: none;
+  position: absolute;
+  -webkit-transform: translate(-50%, -110%);
+  font-size: 12px;
+  background: black;
+  border: 1px white solid;
+  color: white;
+  padding: 10px;
 }
