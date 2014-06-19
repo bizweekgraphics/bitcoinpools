@@ -208,12 +208,8 @@ button {
 
 /* SVG */
 
-#svg-canvas.fullscreen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+svg {
+  font: 10px sans-serif;
 }
 
 path.arrow, polyline.arrow {
@@ -222,45 +218,62 @@ path.arrow, polyline.arrow {
   stroke-width: 1;
 }
 
-svg {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
+.axis path, .axis line {
   fill: none;
   stroke: #ccc;
   shape-rendering: crispEdges;
 }
 
-.pool text {
+#stacked-area .pool text {
   display: none;
 }
 
-.pool:hover text {
+#stacked-area .pool:hover text {
   display: inherit;
 }
 
 .area {
   fill: white;
-  stroke: black;
+  stroke: #ccc;
+  stroke-width: 0.5;
 }
 
-.area:hover {
+#stacked-area .area:hover {
   fill: black;
 }
 
-.line {
-  fill: none;
-}
-
-.breakout {
+.small-multiple {
   width: 300px;
   float: left;
 }
 
-h1 {
-  font-size: 12pt;
+.small-multiple .line {
+  fill: none;
+}
+
+.small-multiple h3 {
+  font-size: 12px;
   font-weight: bold;
   margin: 0;
+}
+
+#small-multiples [data-pool="Unknown"] {
+  display: none;
+}
+
+.small-multiple .area {
+  fill: black;
+}
+
+
+[data-pool="DeepBit"] .area {
+  fill: #0f0;
+}
+
+[data-pool="BTC Guild"] .area {
+  fill: cyan;
+}
+
+[data-pool="GHash.IO"] .area {
+  fill: magenta;
 }

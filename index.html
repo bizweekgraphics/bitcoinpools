@@ -36,8 +36,11 @@ font-family:BWHaasRegular
 
 <body class="wide">
 
-  <div id="charts-container"></div>
+  <div id="stacked-area"></div>
 
+  <div id="small-multiples"></div>
+
+  <div class="clearfix"></div>
   <div class="data-credit">Graphic by Bloomberg Businessweek. Data: Organ of Corti</div>
 
   <script src="js/vendor/d3.min.js"></script>
@@ -93,7 +96,7 @@ font-family:BWHaasRegular
     var stack = d3.layout.stack()
         .values(function(d) { return d.values; });
 
-    var svg = d3.select("#charts-container").append("svg")
+    var svg = d3.select("#stacked-area").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -120,7 +123,8 @@ font-family:BWHaasRegular
       var pool = svg.selectAll(".pool")
           .data(poolstack)
         .enter().append("g")
-          .attr("class", "pool");
+          .attr("class", "pool")
+          .attr("data-pool", function(d) { return d.name; });
 
       pool.append("path")
           .attr("class", "area")
@@ -147,15 +151,18 @@ font-family:BWHaasRegular
 
       // breakouts
 
-      var breakoutEnter = d3.selectAll("#charts-container div.breakout")
-        .data(poolstack)
+      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
+          .data(poolstack)
         .enter()
-        .append("div")
-        .classed("breakout", true);
+          .append("div")
+          .classed("small-multiple", true)
+          .attr("data-pool", function(d) { return d.name; });
 
-      breakoutEnter.append("h1").text(function(d) { return d.name; });
+      smallMultiplesEnter
+          .append("h3").text(function(d) { return d.name; });
 
-      breakoutEnter.call(poolChart);
+      smallMultiplesEnter
+          .call(poolChart);
 
     });
 
