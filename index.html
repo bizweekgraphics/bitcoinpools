@@ -57,7 +57,7 @@ font-family:BWHaasRegular
 
     var poolChart = timeSeriesChart()
         .dataAccessor("values")
-        .margin({top: 10, right: 10, bottom: 20, left: 30})
+        .margin({top: 10, right: 10, bottom: 20, left: 35})
         .x(function(d) { return d.date; })
         .y(function(d) { return +d.y; })
         .yDomain(function(d) {
@@ -78,7 +78,7 @@ font-family:BWHaasRegular
 
     // stacked area chart setup
 
-    var margin = {top: 20, right: 80, bottom: 30, left: 30},
+    var margin = {top: 20, right: 80, bottom: 30, left: 35},
         width = 970 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -95,12 +95,22 @@ font-family:BWHaasRegular
 
     var xAxis = d3.svg.axis()
         .scale(x)
+        .tickSize(6,0)
+        .ticks(3)
         .orient("bottom");
 
     var yAxis = d3.svg.axis()
         .scale(y)
         .orient("left")
+        .tickValues([0,.25,.5,.75,1])
         .tickFormat(formatPercent);
+
+    var gridlines = d3.svg.axis()
+        .scale(y)
+        .orient("right")
+        .tickSize(width,0)
+        .tickValues([0.5])
+        .tickFormat("");
 
     var area = d3.svg.area()
         .x(function(d) { return x(d.date); })
@@ -187,6 +197,10 @@ font-family:BWHaasRegular
       svg.append("g")
           .attr("class", "y axis")
           .call(yAxis);
+
+      svg.append("g")
+          .attr("class", "gridlines")
+          .call(gridlines);
 
       // breakouts
 

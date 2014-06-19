@@ -226,6 +226,7 @@ path.arrow, polyline.arrow {
 
 .gridlines line {
   stroke: red;
+  stroke-dasharray: 5 5;
 }
 
 #stacked-area .pool text {
