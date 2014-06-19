@@ -27,9 +27,8 @@ function timeSeriesChart() {
       xScale.range([0, width - margin.left - margin.right]);
 
       // Update the y-scale.
-      yScale
-          .domain([0, d3.max(chart.data, function(d) { return d[1]; })])
-          .range([height - margin.top - margin.bottom, 0]);
+      if(!yScale.domain.overridden) yScale.domain([0, d3.max(chart.data, function(d) { return d[1]; })])
+      yScale.range([height - margin.top - margin.bottom, 0]);
 
       // Select the svg element, if it exists.
       var svg = d3.select(this).selectAll("svg").data([chart.data]);
@@ -121,6 +120,17 @@ function timeSeriesChart() {
     }
     xScale.domain(_);
     xScale.domain.overridden = true;
+    return chart;
+  };
+
+  chart.yDomain = function(_) {
+    if(!arguments.length) return yScale.domain();
+    if (_ == "auto") {
+      yScale.domain(d3.extent(chart.data, function(d) { return d[0]; }));
+      return chart;
+    }
+    yScale.domain(_);
+    yScale.domain.overridden = true;
     return chart;
   };
 
