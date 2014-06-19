@@ -130,7 +130,7 @@ font-family:BWHaasRegular
         .attr('stroke', '#000000')
         .attr('stroke-width', 0.5);
 
-    d3.csv("data/weeklyBlockSolves.csv", function(error, data) {
+    d3.csv("data/blocksolves-weekly-with-daily.csv", function(error, data) {
 
       var pools = _.uniq(_.pluck(data,'pool'));
       var dates = _.uniq(_.pluck(data,'date'));
