@@ -10,6 +10,7 @@ function timeSeriesChart() {
       yScale = d3.scale.linear(),
       xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0).ticks(2),
       yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0).ticks(2).tickFormat(d3.format(".0%")),
+      gridlines = d3.svg.axis().scale(yScale).orient("right").tickSize(260,0).tickValues([0.5]).tickFormat(""),
       area = d3.svg.area().x(X).y1(Y),
       line = d3.svg.line().x(X).y(Y);
 
@@ -38,7 +39,7 @@ function timeSeriesChart() {
       if(yScale.domain.function) yScale.domain(yScale.domain.function(chart.metadata));
       yScale.range([height - margin.top - margin.bottom, 0]);
       yAxis.tickValues(yScale.domain());
-      
+
       // Select the svg element, if it exists.
       var svg = d3.select(this).selectAll("svg").data([chart.data]);
 
@@ -52,6 +53,7 @@ function timeSeriesChart() {
       gEnter.append("path").attr("class", "line");
       gEnter.append("g").attr("class", "x axis");
       gEnter.append("g").attr("class", "y axis");
+      gEnter.append("g").attr("class", "gridlines");
 
       // Update the outer dimensions.
       svg .attr("width", width)
@@ -78,6 +80,11 @@ function timeSeriesChart() {
       g.select(".y.axis")
           .attr("transform", "translate(0,0)")
           .call(yAxis);
+
+      // Update the gridlines.
+      g.select(".gridlines")
+          .attr("transform", "translate(0,0)")
+          .call(gridlines);
 
     });
   }

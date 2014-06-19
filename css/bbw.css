@@ -224,6 +224,10 @@ path.arrow, polyline.arrow {
   shape-rendering: crispEdges;
 }
 
+.gridlines line {
+  stroke: red;
+}
+
 #stacked-area .pool text {
   display: none;
 }
