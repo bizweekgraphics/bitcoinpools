@@ -41,7 +41,7 @@ font-family:BWHaasRegular
   <div id="small-multiples"></div>
 
   <div class="clearfix"></div>
-  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: Organ of Corti</div>
+  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: <a href="http://organofcorti.blogspot.com/">Organ of Corti</a> (<a href="data/blocksolves-weekly-with-daily.csv">csv</a>)</div>
 
   <script src="js/vendor/d3.min.js"></script>
   <script src="js/vendor/underscore-min.js"></script>
@@ -220,6 +220,7 @@ font-family:BWHaasRegular
 
       smallMultiplesEnter
           .append("h3").text(function(d) { return d.name; });
+          //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
 
       smallMultiplesEnter
           .call(poolChart);
