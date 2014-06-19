@@ -56,7 +56,8 @@ font-family:BWHaasRegular
         .dataAccessor("values")
         .x(function(d) { return d.date; })
         .y(function(d) { return +d.y; })
-        .width(960);
+        .yDomain([0,.5])
+        .width(300);
 
     // stacked area chart setup
 

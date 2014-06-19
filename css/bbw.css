@@ -229,7 +229,7 @@ svg {
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #ccc;
   shape-rendering: crispEdges;
 }
 
@@ -248,4 +248,19 @@ svg {
 
 .area:hover {
   fill: black;
+}
+
+.line {
+  fill: none;
+}
+
+.breakout {
+  width: 300px;
+  float: left;
+}
+
+h1 {
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 0;
 }
