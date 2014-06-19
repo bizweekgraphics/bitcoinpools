@@ -7,7 +7,7 @@ function timeSeriesChart() {
       yValue = function(d) { return d[1]; },
       xScale = d3.time.scale(),
       yScale = d3.scale.linear(),
-      xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
+      xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0).ticks(2),
       area = d3.svg.area().x(X).y1(Y),
       line = d3.svg.line().x(X).y(Y);
 
