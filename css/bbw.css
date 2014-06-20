@@ -248,8 +248,8 @@ path.arrow, polyline.arrow {
   fill: black;
 }
 
-#small-multiples .active {
-  background: #efefef;
+#small-multiples .active .area {
+  fill: black;
 }
 
 .small-multiple {
@@ -272,7 +272,7 @@ path.arrow, polyline.arrow {
 }
 
 .small-multiple .area {
-  fill: black;
+  fill: #ccc;
 }
 
 
@@ -301,4 +301,9 @@ path.arrow, polyline.arrow {
   border: 1px white solid;
   color: white;
   padding: 10px;
+}
+
+.scrubber line {
+  stroke: black;
+  pointer-events: none;
 }

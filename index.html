@@ -112,6 +112,12 @@ font-family:BWHaasRegular
         .tickValues([0.5])
         .tickFormat("");
 
+    var scrubber = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .tickSize(height+6,0)
+        .tickFormat(d3.time.format("%b. %d, %Y"));
+
     var area = d3.svg.area()
         .x(function(d) { return x(d.date); })
         .y0(function(d) { return y(d.y0); })
@@ -193,12 +199,24 @@ font-family:BWHaasRegular
           .attr("class", "gridlines")
           .call(gridlines);
 
+      svg.append("g")
+          .attr("class", "scrubber")
+          .style("display", "none")
+          .call(scrubber);
+
       var tooltip = d3.select("#stacked-area")
         .append("div")
         .classed("tooltip", true)
         .style("display", "none");
 
       d3.selectAll(".pool").on("mousemove", function(d, i) {
+
+        scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
+        d3.select(".scrubber")
+          .style("display", "block")
+          .call(scrubber);
+        d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
+
         tooltip
           .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
           .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
@@ -207,10 +225,13 @@ font-family:BWHaasRegular
 
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
+
       });
       d3.select(".chartarea").on("mouseout", function() {
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         tooltip.style("display", "none");
+        d3.select(".scrubber").style("display", "none");
+        d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
       })
 
       // breakouts
