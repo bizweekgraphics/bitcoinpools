@@ -248,6 +248,10 @@ path.arrow, polyline.arrow {
   fill: black;
 }
 
+#small-multiples .active {
+  background: #efefef;
+}
+
 .small-multiple {
   width: 315px;
   float: left;

@@ -204,8 +204,12 @@ font-family:BWHaasRegular
           .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
           .style("display", "block")
           .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
+
+        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+        d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
       });
       d3.select(".chartarea").on("mouseout", function() {
+        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         tooltip.style("display", "none");
       })
 
