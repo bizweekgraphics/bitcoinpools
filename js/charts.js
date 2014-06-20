@@ -11,6 +11,7 @@ function timeSeriesChart() {
       xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0).ticks(2),
       yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0).ticks(2).tickFormat(d3.format(".0%")),
       gridlines = d3.svg.axis().scale(yScale).orient("right").tickSize(width-margin.left-margin.right,0).tickValues([0.5]).tickFormat(""),
+      scrubber = d3.svg.axis().scale(xScale).orient("bottom").tickSize(height+6,0).tickValues([d3.time.format("%m/%d/%y").parse("01/04/13")]).tickFormat(d3.time.format("%b. %d, %Y")),
       area = d3.svg.area().x(X).y1(Y),
       line = d3.svg.line().x(X).y(Y);
 
@@ -54,6 +55,7 @@ function timeSeriesChart() {
       gEnter.append("g").attr("class", "x axis");
       gEnter.append("g").attr("class", "y axis");
       gEnter.append("g").attr("class", "gridlines");
+      gEnter.append("g").attr("class", "scrubber");
 
       // Update the outer dimensions.
       svg .attr("width", width)
@@ -84,8 +86,12 @@ function timeSeriesChart() {
       // Update the gridlines.
       gridlines.tickSize(width-margin.left-margin.right, 0);
       g.select(".gridlines")
-          .attr("transform", "translate(0,0)")
           .call(gridlines);
+
+      // Update the scrubber.
+      scrubber.tickSize(height+6, 0);
+      g.select(".scrubber")
+          .call(scrubber);
 
     });
   }
@@ -165,6 +171,12 @@ function timeSeriesChart() {
     yScale.domain.overridden = true;
     return chart;
   };
+
+  chart.scrub = function(y) {
+    //if no arguments, clear scrub highlight
+    if(!arguments.length) scrubber.tickValues([]);
+    scrubber.tickValues([y]);
+  }
 
   return chart;
 }
