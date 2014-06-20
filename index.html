@@ -209,35 +209,13 @@ font-family:BWHaasRegular
         .classed("tooltip", true)
         .style("display", "none");
 
-      // breakouts
-
-      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
-          .data(poolstack)
-        .enter()
-          .append("div")
-          .classed("small-multiple", true)
-          .attr("data-pool", function(d) { return d.name; });
-
-      smallMultiplesEnter
-          .append("h3").text(function(d) { return d.name; });
-          //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
-
-      smallMultiplesEnter
-          .call(poolChart);
-
-      // event junk
-
       d3.selectAll(".pool").on("mousemove", function(d, i) {
 
-        var scrubdate = x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left);
-        scrubber.tickValues([scrubdate]);
+        scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
         d3.select(".scrubber")
           .style("display", "block")
           .call(scrubber);
         d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
-        poolChart.scrub(scrubdate);
-        smallMultiplesEnter
-            .call(poolChart);
 
         tooltip
           .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
@@ -256,6 +234,21 @@ font-family:BWHaasRegular
         d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
       })
 
+      // breakouts
+
+      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
+          .data(poolstack)
+        .enter()
+          .append("div")
+          .classed("small-multiple", true)
+          .attr("data-pool", function(d) { return d.name; });
+
+      smallMultiplesEnter
+          .append("h3").text(function(d) { return d.name; });
+          //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
+
+      smallMultiplesEnter
+          .call(poolChart);
 
     });
 
