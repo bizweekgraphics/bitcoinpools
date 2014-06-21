@@ -83,7 +83,7 @@ font-family:BWHaasRegular
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%m/%d/%y").parse,
-        formatPrice = d3.format("$.1r")
+        formatPrice = d3.format("$.2r")
         formatPercent = d3.format(".0%");
 
     var x = d3.time.scale()
@@ -270,19 +270,22 @@ font-family:BWHaasRegular
             .attr("class", "priceline")
             .call(priceline);
 
-
         // rollovers
 
         d3.selectAll(".pool").on("mousemove", function(d, i) {
 
+          var mouseDate = x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left);
+
           // show vertical scrubber
-          scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
+          scrubber.tickValues([mouseDate]);
           d3.select(".scrubber")
             .style("display", "block")
             .call(scrubber);
           d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
 
-
+          // show priceline marginal
+          priceline.tickValues([mouseDate]);
+          d3.select(".priceline").call(priceline);
 
           // show tooltip over mouse
           tooltip
@@ -299,6 +302,11 @@ font-family:BWHaasRegular
 
         // clear hover info and restore normal axes on mouseout
         d3.select(".chartarea").on("mouseout", function() {
+
+          // revert to normal priceline
+          priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
+          d3.select(".priceline").call(priceline);
+
           d3.selectAll("#small-multiples .small-multiple").classed("active", false);
           tooltip.style("display", "none");
           d3.select(".scrubber").style("display", "none");
