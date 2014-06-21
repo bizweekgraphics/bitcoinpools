@@ -83,7 +83,7 @@ font-family:BWHaasRegular
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%m/%d/%y").parse,
-        parsePrice = d3.format("$.1r")
+        formatPrice = d3.format("$.1r")
         formatPercent = d3.format(".0%");
 
     var x = d3.time.scale()
@@ -106,6 +106,7 @@ font-family:BWHaasRegular
         .tickValues([0,.25,.5,.75,1])
         .tickFormat(formatPercent);
 
+    // redline
     var gridlines = d3.svg.axis()
         .scale(y)
         .orient("right")
@@ -113,6 +114,7 @@ font-family:BWHaasRegular
         .tickValues([0.5])
         .tickFormat("");
 
+    // on hover, date
     var scrubber = d3.svg.axis()
         .scale(x)
         .orient("bottom")
@@ -211,31 +213,6 @@ font-family:BWHaasRegular
           .classed("tooltip", true)
           .style("display", "none");
 
-        d3.selectAll(".pool").on("mousemove", function(d, i) {
-
-          scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
-          d3.select(".scrubber")
-            .style("display", "block")
-            .call(scrubber);
-          d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
-
-          tooltip
-            .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
-            .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
-            .style("display", "block")
-            .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
-
-          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-          d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
-
-        });
-        d3.select(".chartarea").on("mouseout", function() {
-          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-          tooltip.style("display", "none");
-          d3.select(".scrubber").style("display", "none");
-          d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
-        })
-
         // breakouts
 
         var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
@@ -254,9 +231,6 @@ font-family:BWHaasRegular
 
         // prices
 
-        var priceline = svg.append("g")
-          .classed("priceline", true);
-
         var selectedPriceData = [];
         // get prices at extremes of pool data
         selectedPriceData.push(_.findWhere(priceData, {"date": dates[0]}));
@@ -266,14 +240,71 @@ font-family:BWHaasRegular
           var threshold = Math.pow(10,i);
           selectedPriceData.push(_.find(priceData, function(d) { return d.price >= threshold; }));
         }
-        console.log(selectedPriceData);
+
+        /*
+        var priceline = svg.append("g")
+          .classed("priceline", true);
 
         priceline.selectAll("text")
           .data(selectedPriceData)
           .enter()
           .append("text")
-          .text(function(d) { console.log(d); return parsePrice(d.price); })
-          .attr("x", function(d) { return x(parseDate(d.date)); });
+          .text(function(d) { return formatPrice(d.price); })
+          .attr("x", function(d) { return x(parseDate(d.date)); })
+          .attr("dy", "-8px");
+        */
+
+        var getPrice = function(d) {
+          // converting date object back to non-zero-padded string as found in the csv
+          var date = d3.time.format("%-m/%-d/%y")(d);
+          return formatPrice(_.findWhere(priceData, {"date": date}).price);
+        }
+
+        var priceline = d3.svg.axis()
+            .scale(x)
+            .tickSize(6,0)
+            .orient("top")
+            .tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }))
+            .tickFormat(getPrice);
+        svg.append("g")
+            .attr("class", "priceline")
+            .call(priceline);
+
+
+        // rollovers
+
+        d3.selectAll(".pool").on("mousemove", function(d, i) {
+
+          // show vertical scrubber
+          scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
+          d3.select(".scrubber")
+            .style("display", "block")
+            .call(scrubber);
+          d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
+
+
+
+          // show tooltip over mouse
+          tooltip
+            .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
+            .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
+            .style("display", "block")
+            .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
+
+          // highlight corresponding small multiple
+          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+          d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
+
+        });
+
+        // clear hover info and restore normal axes on mouseout
+        d3.select(".chartarea").on("mouseout", function() {
+          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+          tooltip.style("display", "none");
+          d3.select(".scrubber").style("display", "none");
+          d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
+        })
+
 
       });
 

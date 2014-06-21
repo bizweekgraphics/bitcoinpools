@@ -307,3 +307,7 @@ path.arrow, polyline.arrow {
   stroke: black;
   pointer-events: none;
 }
+
+.priceline line {
+  stroke: #ccc;
+}
