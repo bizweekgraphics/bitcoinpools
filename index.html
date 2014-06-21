@@ -83,6 +83,7 @@ font-family:BWHaasRegular
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%m/%d/%y").parse,
+        parsePrice = d3.format("$.1r")
         formatPercent = d3.format(".0%");
 
     var x = d3.time.scale()
@@ -148,107 +149,133 @@ font-family:BWHaasRegular
         .attr('stroke-width', 0.5);
 
     d3.csv("data/blocksolves-weekly-with-daily.csv", function(error, data) {
+      d3.csv("data/coindesk-bpi-USD-close.csv", function(error, priceData) {
 
-      var pools = _.uniq(_.pluck(data,'pool'));
-      var dates = _.uniq(_.pluck(data,'date'));
+        var pools = _.uniq(_.pluck(data,'pool'));
+        var dates = _.uniq(_.pluck(data,'date'));
 
-      var poolblocks = pools.map(function(p) {
-        var pool = {
-          name: p,
-          values: dates.map(function(d) {
-            var datum = _.where(data,{pool:p,date:d});
-            return { date: parseDate(d), y: datum.length>0 ? +datum[0].percentage/100 : 0 };
-          })
-        };
-        pool.max = d3.max(pool.values, function(d) { return d.y; });
-        return pool;
-      });
-      poolblocks = _.sortBy(poolblocks, function(d) {
-        if(d.name=="Unknown") return 1;
-        if(d.name=="DeepBit") return -4;
-        if(d.name=="BTC Guild") return -3;
-        if(d.name=="GHash.IO") return -2;
-        //this will be between -1 and 0
-        return -d.max;
-      })
-      var poolstack = stack(poolblocks);
-      console.log(poolstack);
+        var poolblocks = pools.map(function(p) {
+          var pool = {
+            name: p,
+            values: dates.map(function(d) {
+              var datum = _.where(data,{pool:p,date:d});
+              return { date: parseDate(d), y: datum.length>0 ? +datum[0].percentage/100 : 0 };
+            })
+          };
+          pool.max = d3.max(pool.values, function(d) { return d.y; });
+          return pool;
+        });
+        poolblocks = _.sortBy(poolblocks, function(d) {
+          if(d.name=="Unknown") return 1;
+          if(d.name=="DeepBit") return -4;
+          if(d.name=="BTC Guild") return -3;
+          if(d.name=="GHash.IO") return -2;
+          //this will be between -1 and 0
+          return -d.max;
+        })
+        var poolstack = stack(poolblocks);
+        console.log(poolstack);
 
-      x.domain(d3.extent(dates.map(function(d) { return parseDate(d); })));
+        x.domain(d3.extent(dates.map(function(d) { return parseDate(d); })));
 
-      var pool = svg.selectAll(".pool")
-          .data(poolstack)
-        .enter().append("g")
-          .attr("class", "pool")
-          .attr("data-pool", function(d) { return d.name; });
+        var pool = svg.selectAll(".pool")
+            .data(poolstack)
+          .enter().append("g")
+            .attr("class", "pool")
+            .attr("data-pool", function(d) { return d.name; });
 
-      pool.append("path")
-          .attr("class", "area")
-          .attr("d", function(d) { return area(d.values); });
+        pool.append("path")
+            .attr("class", "area")
+            .attr("d", function(d) { return area(d.values); });
 
-      svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
 
-      svg.append("g")
-          .attr("class", "y axis")
-          .call(yAxis);
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
 
-      svg.append("g")
-          .attr("class", "gridlines")
-          .call(gridlines);
+        svg.append("g")
+            .attr("class", "gridlines")
+            .call(gridlines);
 
-      svg.append("g")
-          .attr("class", "scrubber")
-          .style("display", "none")
-          .call(scrubber);
+        svg.append("g")
+            .attr("class", "scrubber")
+            .style("display", "none")
+            .call(scrubber);
 
-      var tooltip = d3.select("#stacked-area")
-        .append("div")
-        .classed("tooltip", true)
-        .style("display", "none");
-
-      d3.selectAll(".pool").on("mousemove", function(d, i) {
-
-        scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
-        d3.select(".scrubber")
-          .style("display", "block")
-          .call(scrubber);
-        d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
-
-        tooltip
-          .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
-          .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
-          .style("display", "block")
-          .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
-
-        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-        d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
-
-      });
-      d3.select(".chartarea").on("mouseout", function() {
-        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-        tooltip.style("display", "none");
-        d3.select(".scrubber").style("display", "none");
-        d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
-      })
-
-      // breakouts
-
-      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
-          .data(poolstack)
-        .enter()
+        var tooltip = d3.select("#stacked-area")
           .append("div")
-          .classed("small-multiple", true)
-          .attr("data-pool", function(d) { return d.name; });
+          .classed("tooltip", true)
+          .style("display", "none");
 
-      smallMultiplesEnter
-          .append("h3").text(function(d) { return d.name; });
-          //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
+        d3.selectAll(".pool").on("mousemove", function(d, i) {
 
-      smallMultiplesEnter
-          .call(poolChart);
+          scrubber.tickValues([x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left)]);
+          d3.select(".scrubber")
+            .style("display", "block")
+            .call(scrubber);
+          d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
+
+          tooltip
+            .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
+            .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
+            .style("display", "block")
+            .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
+
+          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+          d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
+
+        });
+        d3.select(".chartarea").on("mouseout", function() {
+          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+          tooltip.style("display", "none");
+          d3.select(".scrubber").style("display", "none");
+          d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
+        })
+
+        // breakouts
+
+        var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
+            .data(poolstack)
+          .enter()
+            .append("div")
+            .classed("small-multiple", true)
+            .attr("data-pool", function(d) { return d.name; });
+
+        smallMultiplesEnter
+            .append("h3").text(function(d) { return d.name; });
+            //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
+
+        smallMultiplesEnter
+            .call(poolChart);
+
+        // prices
+
+        var priceline = svg.append("g")
+          .classed("priceline", true);
+
+        var selectedPriceData = [];
+        // get prices at extremes of pool data
+        selectedPriceData.push(_.findWhere(priceData, {"date": dates[0]}));
+        selectedPriceData.push(_.findWhere(priceData, {"date": dates[dates.length-1]}));
+        // get dates of prices for every power-of-ten milestone
+        for(var i = 1; i < 4; i++) {
+          var threshold = Math.pow(10,i);
+          selectedPriceData.push(_.find(priceData, function(d) { return d.price >= threshold; }));
+        }
+        console.log(selectedPriceData);
+
+        priceline.selectAll("text")
+          .data(selectedPriceData)
+          .enter()
+          .append("text")
+          .text(function(d) { console.log(d); return parsePrice(d.price); })
+          .attr("x", function(d) { return x(parseDate(d.date)); });
+
+      });
 
     });
 
