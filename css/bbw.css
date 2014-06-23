@@ -272,6 +272,11 @@ path.arrow, polyline.arrow {
   margin: 0;
 }
 
+.small-multiple h3 span {
+  font-weight: normal;
+  font-style: italic;
+}
+
 #small-multiples [data-pool="Unknown"] {
   display: none;
 }
