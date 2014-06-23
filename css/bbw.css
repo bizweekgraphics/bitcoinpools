@@ -307,3 +307,7 @@ path.arrow, polyline.arrow {
   color: white;
   padding: 10px;
 }
+
+.data-caveats {
+  font-size: 10px;
+}
