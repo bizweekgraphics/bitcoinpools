@@ -83,7 +83,8 @@ font-family:BWHaasRegular
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%m/%d/%y").parse,
-        formatPrice = d3.format("$.2r")
+        formatDateLong = d3.time.format("%b. %d, %Y"),
+        formatPrice = d3.format("$.2r"),
         formatPercent = d3.format(".0%");
 
     var x = d3.time.scale()
@@ -113,13 +114,6 @@ font-family:BWHaasRegular
         .tickSize(width,0)
         .tickValues([0.5])
         .tickFormat("");
-
-    // on hover, date
-    var scrubber = d3.svg.axis()
-        .scale(x)
-        .orient("bottom")
-        .tickSize(height+6,0)
-        .tickFormat(d3.time.format("%b. %d, %Y"));
 
     var area = d3.svg.area()
         .x(function(d) { return x(d.date); })
@@ -203,11 +197,6 @@ font-family:BWHaasRegular
             .attr("class", "gridlines")
             .call(gridlines);
 
-        svg.append("g")
-            .attr("class", "scrubber")
-            .style("display", "none")
-            .call(scrubber);
-
         var tooltip = d3.select("#stacked-area")
           .append("div")
           .classed("tooltip", true)
@@ -224,7 +213,6 @@ font-family:BWHaasRegular
 
         smallMultiplesEnter
             .append("h3").text(function(d) { return d.name; });
-            //.append("span").text(function(d) { return "Max share: "+formatPercent(d.max); });
 
         smallMultiplesEnter
             .call(poolChart);
@@ -241,19 +229,6 @@ font-family:BWHaasRegular
           selectedPriceData.push(_.find(priceData, function(d) { return d.price >= threshold; }));
         }
 
-        /*
-        var priceline = svg.append("g")
-          .classed("priceline", true);
-
-        priceline.selectAll("text")
-          .data(selectedPriceData)
-          .enter()
-          .append("text")
-          .text(function(d) { return formatPrice(d.price); })
-          .attr("x", function(d) { return x(parseDate(d.date)); })
-          .attr("dy", "-8px");
-        */
-
         var getPrice = function(d) {
           // converting date object back to non-zero-padded string as found in the csv
           var date = d3.time.format("%-m/%-d/%y")(d);
@@ -267,7 +242,7 @@ font-family:BWHaasRegular
             .tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }))
             .tickFormat(getPrice);
         svg.append("g")
-            .attr("class", "priceline")
+            .attr("class", "priceline axis")
             .call(priceline);
 
         // rollovers
@@ -276,14 +251,11 @@ font-family:BWHaasRegular
 
           var mouseDate = x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left);
 
-          // show vertical scrubber
-          scrubber.tickValues([mouseDate]);
-          d3.select(".scrubber")
-            .style("display", "block")
-            .call(scrubber);
-          d3.selectAll("#stacked-area .x.axis text").style("opacity", 0);
+          // show dateline marginal (x axis bottom, scrubber)
+          xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
+          d3.select(".x.axis").attr("transform", "translate(0,0)").call(xAxis);
 
-          // show priceline marginal
+          // show priceline marginal (x axis top, scrubber)
           priceline.tickValues([mouseDate]);
           d3.select(".priceline").call(priceline);
 
@@ -303,13 +275,16 @@ font-family:BWHaasRegular
         // clear hover info and restore normal axes on mouseout
         d3.select(".chartarea").on("mouseout", function() {
 
-          // revert to normal priceline
+          // revert to normal dateline (x axis bottom)
+          xAxis.tickValues(null).tickSize(6,0).tickFormat(null);
+          d3.select(".x.axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+
+          // revert to normal priceline (x axis top)
           priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
           d3.select(".priceline").call(priceline);
 
           d3.selectAll("#small-multiples .small-multiple").classed("active", false);
           tooltip.style("display", "none");
-          d3.select(".scrubber").style("display", "none");
           d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
         })
 

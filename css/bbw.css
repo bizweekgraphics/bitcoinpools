@@ -223,11 +223,16 @@ path.arrow, polyline.arrow {
   fill: none;
   stroke: #ccc;
   shape-rendering: crispEdges;
+  pointer-events: none;
 }
 
 .gridlines line {
   stroke: red;
   stroke-dasharray: 6 6;
+}
+
+#stacked-area:hover .axis line {
+  stroke: black;
 }
 
 #stacked-area .pool text {
@@ -301,13 +306,4 @@ path.arrow, polyline.arrow {
   border: 1px white solid;
   color: white;
   padding: 10px;
-}
-
-.scrubber line {
-  stroke: black;
-  pointer-events: none;
-}
-
-.priceline line {
-  stroke: #ccc;
 }
