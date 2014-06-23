@@ -97,8 +97,6 @@ font-family:BWHaasRegular
     var y = d3.scale.linear()
         .range([height, 0]);
 
-    var color = d3.scale.category20();
-
     var xAxis = d3.svg.axis()
         .scale(x)
         .tickSize(6,0)
@@ -158,19 +156,35 @@ font-family:BWHaasRegular
           var pool = {
             name: p,
             values: dates.map(function(d) {
-              var datum = _.where(data,{pool:p,date:d});
-              return { date: parseDate(d), y: datum.length>0 ? +datum[0].percentage/100 : 0 };
+              // find row matching pool and date (there should only ever be one)
+              var datum = _.findWhere(data,{pool:p,date:d});
+              // if null, fill with zeros
+              if(!datum) {
+                datum = {
+                  date: d,
+                  pool: p,
+                  percentage: 0,
+                  blocks: 0
+                };
+              }
+              // return parsed &, uh, reworked object
+              return {
+                date: parseDate(d),
+                y: +datum.percentage/100,
+                blocks: +datum.blocks
+              };
             })
           };
           pool.max = d3.max(pool.values, function(d) { return d.y; });
           return pool;
         });
         poolblocks = _.sortBy(poolblocks, function(d) {
-          if(d.name=="Unknown") return 1;
+          // hardcoding ordering of selected pools
+          if(d.name=="Unknown") return 1; //not a pool at all!
           if(d.name=="DeepBit") return -4;
           if(d.name=="BTC Guild") return -3;
           if(d.name=="GHash.IO") return -2;
-          //this will be between -1 and 0
+          //for rest, order by all-time max hashrate share; this will be between -1 and 0
           return -d.max;
         })
         var poolstack = stack(poolblocks);
@@ -225,9 +239,9 @@ font-family:BWHaasRegular
 
         var selectedPriceData = [];
         // get prices at extremes of pool data
-        selectedPriceData.push(_.findWhere(priceData, {"date": dates[0]}));
-        selectedPriceData.push(_.findWhere(priceData, {"date": dates[dates.length-1]}));
-        // get dates of prices for every power-of-ten milestone
+        selectedPriceData.push(_.findWhere(priceData, {"date": dates[0]})); //first price
+        selectedPriceData.push(_.findWhere(priceData, {"date": dates[dates.length-1]})); //last price
+        // get dates of prices for every power-of-ten milestone, within bounds
         for(var i = 1; i < 4; i++) {
           var threshold = Math.pow(10,i);
           selectedPriceData.push(_.find(priceData, function(d) { return d.price >= threshold; }));
@@ -253,7 +267,9 @@ font-family:BWHaasRegular
 
         d3.selectAll(".pool").on("mousemove", function(d, i) {
 
-          var mouseDate = x.invert(d3.mouse(d3.select("#stacked-area")[0][0])[0]-margin.left);
+          var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
+          var mouseDate = x.invert(mouse[0]-margin.left);
+          var dateData = _.find(d.values, function(datapoint) { return +datapoint.date > +mouseDate; });
 
           // show dateline marginal (x axis bottom, scrubber)
           xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
@@ -265,10 +281,10 @@ font-family:BWHaasRegular
 
           // show tooltip over mouse
           tooltip
-            .style("left", d3.mouse(d3.select("#stacked-area")[0][0])[0]+"px")
-            .style("top", d3.mouse(d3.select("#stacked-area")[0][0])[1]+"px")
+            .style("left", mouse[0]+"px")
+            .style("top", mouse[1]+"px")
             .style("display", "block")
-            .html("<b>"+d.name+"</b><br/>Max share: "+formatPercent(d.max));
+            .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y));
 
           // highlight corresponding small multiple
           d3.selectAll("#small-multiples .small-multiple").classed("active", false);
