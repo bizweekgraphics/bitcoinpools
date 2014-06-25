@@ -269,7 +269,7 @@ font-family:BWHaasRegular
 
           var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
           var mouseDate = x.invert(mouse[0]-margin.left);
-          var dateData = _.find(d.values, function(datapoint) { return +datapoint.date > +mouseDate; });
+          var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= +mouseDate; });
 
           // show dateline marginal (x axis bottom, scrubber)
           xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
