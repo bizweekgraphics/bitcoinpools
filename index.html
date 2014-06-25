@@ -166,11 +166,18 @@ font-family:BWHaasRegular
                   blocks: 0
                 };
               }
+
+              var revenue = _.find(priceData, function(item) {
+                return +parseDate(d) <= +parseDate(item.date);
+              })
+              console.log(revenue);
+
               // return parsed &, uh, reworked object
               return {
                 date: parseDate(d),
                 y: +datum.percentage/100,
-                blocks: +datum.blocks
+                blocks: +datum.blocks,
+                revenue: revenue.price * 25 * datum.blocks
               };
             })
           };
@@ -284,7 +291,7 @@ font-family:BWHaasRegular
             .style("left", mouse[0]+"px")
             .style("top", mouse[1]+"px")
             .style("display", "block")
-            .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y));
+            .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y)+"<br/>Revenue: "+formatPrice(dateData.revenue));
 
           // highlight corresponding small multiple
           d3.selectAll("#small-multiples .small-multiple").classed("active", false);
