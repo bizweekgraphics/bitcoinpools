@@ -108,14 +108,6 @@ font-family:BWHaasRegular
         .tickValues([0,.25,.5,.75,1])
         .tickFormat(formatPercent);
 
-    // redline
-    var gridlines = d3.svg.axis()
-        .scale(y)
-        .orient("right")
-        .tickSize(width,0)
-        .tickValues([0.5])
-        .tickFormat("");
-
     var area = d3.svg.area()
         .x(function(d) { return x(d.date); })
         .y0(function(d) { return y(d.y0); })
@@ -170,7 +162,6 @@ font-family:BWHaasRegular
               var revenue = _.find(priceData, function(item) {
                 return +parseDate(d) <= +parseDate(item.date);
               })
-              console.log(revenue);
 
               // return parsed &, uh, reworked object
               return {
@@ -216,10 +207,6 @@ font-family:BWHaasRegular
         svg.append("g")
             .attr("class", "y axis")
             .call(yAxis);
-
-        svg.append("g")
-            .attr("class", "gridlines")
-            .call(gridlines);
 
         var tooltip = d3.select("#stacked-area")
           .append("div")
