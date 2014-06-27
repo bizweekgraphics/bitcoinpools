@@ -86,6 +86,7 @@ font-family:BWHaasRegular
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%m/%d/%y").parse,
+        parseDateNew = d3.time.format("%Y-%m-%d").parse,
         formatDateLong = d3.time.format("%b. %d, %Y"),
         formatPrice = d3.format("$,.2r"),
         formatPercent = d3.format(".0%");
@@ -142,7 +143,7 @@ font-family:BWHaasRegular
 
         var pools = _.uniq(_.pluck(data,'pool'));
         var dates = _.uniq(_.pluck(data,'date'));
-
+        /*
         var poolblocks = pools.map(function(p) {
           var pool = {
             name: p,
@@ -166,7 +167,7 @@ font-family:BWHaasRegular
               // return parsed &, uh, reworked object
               return {
                 date: parseDate(d),
-                y: +datum.percentage/100,
+                percentage: +datum.percentage/100,
                 blocks: +datum.blocks,
                 revenue: revenue.price * 25 * datum.blocks
               };
@@ -184,7 +185,18 @@ font-family:BWHaasRegular
           //for rest, order by all-time max hashrate share; this will be between -1 and 0
           return -d.max;
         })
-        var poolstack = stack(poolblocks);
+        */
+
+        d3.json("rawdata/data.json", function(error, jsonData) {
+          // jsonData.pools.forEach(function(pool, poolIndex) {
+          //   pool.values.forEach(function(mined, minedIndex) {
+          //     jsonData.pools[poolIndex].values[minedIndex].date = parseDateNew(mined.date);
+          //   })
+          // })
+          console.log(jsonData);
+        })
+
+        var poolstack = stack(poolblocks).y(function(d) {return d.percentage;});
         console.log(poolstack);
 
         x.domain(d3.extent(dates.map(function(d) { return parseDate(d); })));
