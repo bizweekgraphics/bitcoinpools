@@ -85,8 +85,7 @@ font-family:BWHaasRegular
         width = 970 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-    var parseDate = d3.time.format("%m/%d/%y").parse,
-        parseDateNew = d3.time.format("%Y-%m-%d").parse,
+    var parseDate = d3.time.format("%Y-%m-%d").parse,
         formatDateLong = d3.time.format("%b. %d, %Y"),
         formatPrice = d3.format("$,.2r"),
         formatPercent = d3.format(".0%");
@@ -115,7 +114,8 @@ font-family:BWHaasRegular
         .y1(function(d) { return y(d.y0 + d.y); });
 
     var stack = d3.layout.stack()
-        .values(function(d) { return d.values; });
+        .values(function(d) { return d.values; })
+        .y(function(d) { return d.percentage; });
 
     var svg = d3.select("#stacked-area").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -138,184 +138,146 @@ font-family:BWHaasRegular
         .attr('stroke', '#000000')
         .attr('stroke-width', 0.5);
 
-    d3.csv("data/blocksolves-weekly-with-daily.csv", function(error, data) {
-      d3.csv("data/coindesk-bpi-USD-close.csv", function(error, priceData) {
+    d3.json("rawdata/data.json", function(error, data) {
 
-        var pools = _.uniq(_.pluck(data,'pool'));
-        var dates = _.uniq(_.pluck(data,'date'));
-        /*
-        var poolblocks = pools.map(function(p) {
-          var pool = {
-            name: p,
-            values: dates.map(function(d) {
-              // find row matching pool and date (there should only ever be one)
-              var datum = _.findWhere(data,{pool:p,date:d});
-              // if null, fill with zeros
-              if(!datum) {
-                datum = {
-                  date: d,
-                  pool: p,
-                  percentage: 0,
-                  blocks: 0
-                };
-              }
-
-              var revenue = _.find(priceData, function(item) {
-                return +parseDate(d) <= +parseDate(item.date);
-              })
-
-              // return parsed &, uh, reworked object
-              return {
-                date: parseDate(d),
-                percentage: +datum.percentage/100,
-                blocks: +datum.blocks,
-                revenue: revenue.price * 25 * datum.blocks
-              };
-            })
-          };
-          pool.max = d3.max(pool.values, function(d) { return d.y; });
-          return pool;
-        });
-        poolblocks = _.sortBy(poolblocks, function(d) {
-          // hardcoding ordering of selected pools
-          if(d.name=="Unknown") return 1; //not a pool at all!
-          if(d.name=="DeepBit") return -4;
-          if(d.name=="BTC Guild") return -3;
-          if(d.name=="GHash.IO") return -2;
-          //for rest, order by all-time max hashrate share; this will be between -1 and 0
-          return -d.max;
+      // though bulk of data work is now being done by python,
+      // we do have to do a few things here...
+      data.pools.forEach(function(pool, poolIndex) {
+        // parse dates
+        pool.values.forEach(function(mined, minedIndex) {
+          data.pools[poolIndex].values[minedIndex].date = parseDate(mined.date);
         })
-        */
+        // ensure dates are in chronological order
+        data.pools[poolIndex].values = _.sortBy(pool.values, function(d) { return +d.date; });
+      })
+      data.pools = _.sortBy(data.pools, function(d) {
+        // hardcoding ordering of selected pools
+        if(d.name=="Unknown") return 1; //not a pool at all!
+        if(d.name=="DeepBit") return -4;
+        if(d.name=="BTC Guild") return -3;
+        if(d.name=="GHash.IO") return -2;
+        //for rest, order by all-time max hashrate share; this will be between -1 and 0
+        return -d.maxPercentage;
+      })
+      var poolstack = stack(data.pools);
+      console.log(poolstack);
 
-        d3.json("rawdata/data.json", function(error, jsonData) {
-          // jsonData.pools.forEach(function(pool, poolIndex) {
-          //   pool.values.forEach(function(mined, minedIndex) {
-          //     jsonData.pools[poolIndex].values[minedIndex].date = parseDateNew(mined.date);
-          //   })
-          // })
-          console.log(jsonData);
-        })
+      x.domain(d3.extent(data.dates.map(function(d) { return parseDate(d.date); })));
 
-        var poolstack = stack(poolblocks).y(function(d) {return d.percentage;});
-        console.log(poolstack);
+      var pool = svg.selectAll(".pool")
+          .data(poolstack)
+        .enter().append("g")
+          .attr("class", "pool")
+          .attr("data-pool", function(d) { return d.name; });
 
-        x.domain(d3.extent(dates.map(function(d) { return parseDate(d); })));
+      pool.append("path")
+          .attr("class", "area")
+          .attr("d", function(d) { return area(d.values); });
 
-        var pool = svg.selectAll(".pool")
-            .data(poolstack)
-          .enter().append("g")
-            .attr("class", "pool")
-            .attr("data-pool", function(d) { return d.name; });
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
 
-        pool.append("path")
-            .attr("class", "area")
-            .attr("d", function(d) { return area(d.values); });
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
 
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+      var tooltip = d3.select("#stacked-area")
+        .append("div")
+        .classed("tooltip", true)
+        .style("display", "none");
 
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
+      // breakouts
 
-        var tooltip = d3.select("#stacked-area")
+      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
+          .data(poolstack)
+        .enter()
           .append("div")
-          .classed("tooltip", true)
-          .style("display", "none");
+          .classed("small-multiple", true)
+          .attr("data-pool", function(d) { return d.name; });
 
-        // breakouts
+      smallMultiplesEnter
+          .append("h3").text(function(d) { return d.name; })
+          .append("span").text(function(d) { return " — max network share: " + formatPercent(d.maxPercentage); });
 
-        var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
-            .data(poolstack)
-          .enter()
-            .append("div")
-            .classed("small-multiple", true)
-            .attr("data-pool", function(d) { return d.name; });
+      smallMultiplesEnter
+          .call(poolChart);
 
-        smallMultiplesEnter
-            .append("h3").text(function(d) { return d.name; })
-            .append("span").text(function(d) { return " — max network share: " + formatPercent(d.max); });
+      // prices
 
-        smallMultiplesEnter
-            .call(poolChart);
+      var selectedPriceData = [];
+      // get prices at extremes of pool data
+      selectedPriceData.push(data.dates[0]); //first price
+      selectedPriceData.push(data.dates[data.dates.length-1]); //last price
+      // get dates of prices for every power-of-ten milestone, within bounds
+      for(var i = 1; i < 4; i++) {
+        var threshold = Math.pow(10,i);
+        selectedPriceData.push(_.find(data.dates, function(d) { return d.price >= threshold; }));
+      }
+      console.log(selectedPriceData);
 
-        // prices
+      var getPrice = function(d) {
+        // converting date object back to non-zero-padded string as found in the csv
+        if(!d) return null;
+        var date = d3.time.format("%Y-%m-%d")(d);
+        return formatPrice(_.findWhere(data.dates, {"date": date}).price);
+      }
 
-        var selectedPriceData = [];
-        // get prices at extremes of pool data
-        selectedPriceData.push(_.findWhere(priceData, {"date": dates[0]})); //first price
-        selectedPriceData.push(_.findWhere(priceData, {"date": dates[dates.length-1]})); //last price
-        // get dates of prices for every power-of-ten milestone, within bounds
-        for(var i = 1; i < 4; i++) {
-          var threshold = Math.pow(10,i);
-          selectedPriceData.push(_.find(priceData, function(d) { return d.price >= threshold; }));
-        }
+      var priceline = d3.svg.axis()
+          .scale(x)
+          .tickSize(6,0)
+          .orient("top")
+          .tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }))
+          .tickFormat(getPrice);
+      svg.append("g")
+          .attr("class", "priceline axis")
+          .call(priceline);
 
-        var getPrice = function(d) {
-          // converting date object back to non-zero-padded string as found in the csv
-          var date = d3.time.format("%-m/%-d/%y")(d);
-          return formatPrice(_.findWhere(priceData, {"date": date}).price);
-        }
+      // rollovers
 
-        var priceline = d3.svg.axis()
-            .scale(x)
-            .tickSize(6,0)
-            .orient("top")
-            .tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }))
-            .tickFormat(getPrice);
-        svg.append("g")
-            .attr("class", "priceline axis")
-            .call(priceline);
+      d3.selectAll(".pool").on("mousemove", function(d, i) {
 
-        // rollovers
+        var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
+        var mouseDate = x.invert(mouse[0]-margin.left);
+        var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= +mouseDate; });
 
-        d3.selectAll(".pool").on("mousemove", function(d, i) {
+        // show dateline marginal (x axis bottom, scrubber)
+        xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
+        d3.select(".x.axis").attr("transform", "translate(0,0)").call(xAxis);
 
-          var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
-          var mouseDate = x.invert(mouse[0]-margin.left);
-          var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= +mouseDate; });
+        // show priceline marginal (x axis top, scrubber)
+        priceline.tickValues([mouseDate]);
+        d3.select(".priceline").call(priceline);
 
-          // show dateline marginal (x axis bottom, scrubber)
-          xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
-          d3.select(".x.axis").attr("transform", "translate(0,0)").call(xAxis);
+        // show tooltip over mouse
+        tooltip
+          .style("left", mouse[0]+"px")
+          .style("top", mouse[1]+"px")
+          .style("display", "block")
+          .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y)+"<br/>Revenue: "+formatPrice(dateData.revenue));
 
-          // show priceline marginal (x axis top, scrubber)
-          priceline.tickValues([mouseDate]);
-          d3.select(".priceline").call(priceline);
-
-          // show tooltip over mouse
-          tooltip
-            .style("left", mouse[0]+"px")
-            .style("top", mouse[1]+"px")
-            .style("display", "block")
-            .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y)+"<br/>Revenue: "+formatPrice(dateData.revenue));
-
-          // highlight corresponding small multiple
-          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-          d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
-
-        });
-
-        // clear hover info and restore normal axes on mouseout
-        d3.select(".chartarea").on("mouseout", function() {
-
-          // revert to normal dateline (x axis bottom)
-          xAxis.tickValues(null).tickSize(6,0).tickFormat(null);
-          d3.select(".x.axis").attr("transform", "translate(0," + height + ")").call(xAxis);
-
-          // revert to normal priceline (x axis top)
-          priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
-          d3.select(".priceline").call(priceline);
-
-          d3.selectAll("#small-multiples .small-multiple").classed("active", false);
-          tooltip.style("display", "none");
-          d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
-        })
-
+        // highlight corresponding small multiple
+        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+        d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
 
       });
+
+      // clear hover info and restore normal axes on mouseout
+      d3.select(".chartarea").on("mouseout", function() {
+
+        // revert to normal dateline (x axis bottom)
+        xAxis.tickValues(null).tickSize(6,0).tickFormat(null);
+        d3.select(".x.axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+
+        // revert to normal priceline (x axis top)
+        priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
+        d3.select(".priceline").call(priceline);
+
+        d3.selectAll("#small-multiples .small-multiple").classed("active", false);
+        tooltip.style("display", "none");
+        d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
+      })
 
     });
 
