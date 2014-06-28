@@ -298,6 +298,10 @@ path.arrow, polyline.arrow {
   fill: magenta;
 }
 
+[data-pool="ASICMiner"] .area {
+  fill: url(#diagonalHatchMagenta);
+}
+
 [data-pool="Unknown"] .area {
   fill: url(#diagonalHatch);
 }
