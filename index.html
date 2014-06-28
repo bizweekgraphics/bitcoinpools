@@ -231,7 +231,6 @@ font-family:BWHaasRegular
         var threshold = Math.pow(10,i);
         selectedPriceData.push(_.find(data.dates, function(d) { return d.price >= threshold; }));
       }
-      console.log(selectedPriceData);
 
       var getPrice = function(d) {
         // converting date object back to non-zero-padded string as found in the csv
