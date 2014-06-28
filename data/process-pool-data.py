@@ -122,8 +122,6 @@ for name, stats in poolStats.transpose().to_dict().iteritems():
                 {'date': dateString,
                  'percentage': results[['percentage']].values[0][0]/100,
                  'blocks': results[['blocks']].values[0][0],
-                 'price': price,
-                 'reward': reward,
                  'revenue': results[['blocks']].values[0][0] * price * reward,
                  'periodDays': 7 })
 
