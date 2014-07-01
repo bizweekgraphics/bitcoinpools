@@ -36,6 +36,8 @@ font-family:BWHaasRegular
 
 <body class="wide">
 
+  <div><h1>Bitcoin mining pools over time (ROUGH DRAFT)</h1></div>
+
   <div id="stacked-area"></div>
 
   <div id="small-multiples"></div>
@@ -88,7 +90,8 @@ font-family:BWHaasRegular
     var parseDate = d3.time.format("%Y-%m-%d").parse,
         formatDateLong = d3.time.format("%b. %d, %Y"),
         formatPrice = d3.format("$,.2r"),
-        formatPercent = d3.format(".0%");
+        formatPercent = d3.format(".0%"),
+        formatNumber = d3.format(",");
 
     var x = d3.time.scale()
         .range([0, width]);
@@ -112,7 +115,7 @@ font-family:BWHaasRegular
         .x(function(d) { return x(d.date); })
         .y0(function(d) { return y(d.y0); })
         .y1(function(d) { return y(d.y0 + d.y); })
-        .interpolate('step');
+        .interpolate('step-before');
 
     var stack = d3.layout.stack()
         .values(function(d) { return d.values; })
@@ -215,7 +218,7 @@ font-family:BWHaasRegular
 
       smallMultiplesEnter
           .append("h3").text(function(d) { return d.name; })
-          .append("span").text(function(d) { return " — max network share: " + formatPercent(d.maxPercentage); });
+          .append("span").text(function(d) { return " – " + formatPercent(d.maxPercentage) + " max, " + formatNumber(d.sumBlocks) + " blocks"; });
 
       smallMultiplesEnter
           .call(poolChart);
@@ -255,7 +258,7 @@ font-family:BWHaasRegular
 
         var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
         var mouseDate = x.invert(mouse[0]-margin.left);
-        var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= +mouseDate; });
+        var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= (+mouseDate); });
 
         // show dateline marginal (x axis bottom, scrubber)
         xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
@@ -270,7 +273,7 @@ font-family:BWHaasRegular
           .style("left", mouse[0]+"px")
           .style("top", mouse[1]+"px")
           .style("display", "block")
-          .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y)+"<br/>Revenue: "+formatPrice(dateData.revenue));
+          .html("<b>"+d.name+"</b><br/>Share: "+formatPercent(dateData.y)+"<br/>Revenue: "+formatPrice(dateData.revenue/dateData.periodDays) + " / day");
 
         // highlight corresponding small multiple
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
