@@ -43,9 +43,17 @@ font-family:BWHaasRegular
   <div id="small-multiples"></div>
 
   <div class="clearfix"></div>
-  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: <a href="http://organofcorti.blogspot.com/">Organ of Corti</a> (<a href="data/blocksolves-weekly-with-daily.csv">csv</a>)</div>
+  <div class="data-credit">Graphic by Bloomberg Businessweek. Data: <a href="http://organofcorti.blogspot.com/">Organ of Corti</a> (<a href="data/data.json">json</a>, <a href="data/blocksolves-weekly-with-daily.csv">csv</a>)</div>
   <div class="data-caveats">
-    <p><span style="text-transform: uppercase">Caveats and methodology:</span> Data is derived from claims made by miners, either on their websites or in coinbase signatures, and known addresses. Due to the anonymous nature of the Bitcoin network, mining (in the form of block solves) is only identifiable if declared, and even then is not verifiable. Notably, Slush's pool was the first in operation (in December 2010), but data for it only became available in January 2012. Data is weekly except for the three weeks when DeepBit, BTC Guild, and GHash.IO peaked, during which daily data is shown; thus, those jagged spans indicate higher-resolution data, not necessarily higher intrinsic volatility. Inferred network share percentages are subject to fluctuations due to luck; e.g., over a ten-minute period, there may be only one miner to successfully mine a block, but one should not infer an instantaneous network share of 100%. Furthermore, there is no guarantee that your sense perceptions correspond to an objective reality, or indeed that a world exists outside your head.</p>
+    <p>Caveats and methodology:</p>
+    <ul>
+    <li>Mining data is derived from claims made by miners, either on their websites or in coinbase signatures, and known addresses. Due to the anonymous nature of the Bitcoin network, mining (in the form of block solves) is only identifiable if declared, and even then is not verifiable. </li>
+    <li>Dollar conversions use the Coindesk Bitcoin Price Index, a weighted average of the exchange rate to USD on major exchanges. Revenue figures are calculated according to the exchange rate at the time of mining.</li>
+    <li>Slush's pool was the first in operation (founded November 27, 2010; mined first block December 16, 2010), but data for it only became available on January 27, 2012. </li>
+    <li>BTC Guild data is entirely missing from October 24 to November 6, 2011. </li>
+    <li>Data is weekly except for the three days when DeepBit, BTC Guild, and GHash.IO peaked, for which daily data is shown; thus, the abrupt peaks indicate higher-resolution data, not necessarily higher intrinsic volatility. See here for a static daily chart.</li>
+    <li>Inferred network hashrate share percentages are subject to fluctuations due to luck.</li>
+    </ul>
   </div>
 
   <script src="js/vendor/d3.min.js"></script>
