@@ -264,7 +264,7 @@ font-family:BWHaasRegular
 
       d3.selectAll(".pool").on("mousemove", function(d, i) {
 
-        var mouse = d3.mouse(d3.select("#stacked-area")[0][0]);
+        var mouse = d3.mouse(d3.select("html")[0][0]);
         var mouseDate = x.invert(mouse[0]-margin.left);
         var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= (+mouseDate); });
 
