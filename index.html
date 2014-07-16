@@ -287,6 +287,11 @@ font-family:BWHaasRegular
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         d3.select('#small-multiples [data-pool="'+d.name+'"]').classed("active", true);
 
+        // update crosshairs on small multiples
+        d3.select("#small-multiples").selectAll("div.small-multiple")
+            .data(poolstack)
+            .call(poolChart.crosshairs, mouseDate);
+
       });
 
       // clear hover info and restore normal axes on mouseout
@@ -300,9 +305,15 @@ font-family:BWHaasRegular
         priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
         d3.select(".priceline").call(priceline);
 
+        // clear highlight of small multiple
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         tooltip.style("display", "none");
         d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
+
+        // clear crosshairs on small multiples
+        d3.select("#small-multiples").selectAll("div.small-multiple")
+            .data(poolstack)
+            .call(poolChart.crosshairs, false);
       });
 
       // SMALL MULTIPLE ROLLOVERS
@@ -327,6 +338,15 @@ font-family:BWHaasRegular
         // highlight corresponding stacked area
         d3.select('#stacked-area [data-pool="'+ smData[0].name +'"]').classed("active", true);
 
+        // show dateline marginal (x axis bottom, scrubber) on stacked area
+        xAxis.tickValues([mouseDate]).tickSize(height+6,0).tickFormat(formatDateLong);
+        d3.select(".x.axis").attr("transform", "translate(0,0)").call(xAxis);
+
+        // show priceline marginal (x axis top, scrubber) on stacked area
+        priceline.tickValues([mouseDate]);
+        d3.select(".priceline").call(priceline);
+
+
       });
 
       // clear hover info and restore normal axes on mouseout
@@ -343,9 +363,18 @@ font-family:BWHaasRegular
             .data(poolstack)
             .call(poolChart.crosshairs, false);
 
-        // unhighlight
+        // unhighlight corresponding stacked area
         var poolName = d3.select(this.parentNode).attr("data-pool");
         d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", false);
+
+        // revert to normal dateline (x axis bottom) on stacked area
+        xAxis.tickValues(null).tickSize(6,0).tickFormat(null);
+        d3.select(".x.axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+
+        // revert to normal priceline (x axis top) on stacked area
+        priceline.tickValues(_.pluck(selectedPriceData, "date").map(function(d) { return parseDate(d); }));
+        d3.select(".priceline").call(priceline);
+
       });
 
     });
