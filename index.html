@@ -303,7 +303,27 @@ font-family:BWHaasRegular
         d3.selectAll("#small-multiples .small-multiple").classed("active", false);
         tooltip.style("display", "none");
         d3.selectAll("#stacked-area .x.axis text").style("opacity", 1);
-      })
+      });
+
+      // SMALL MULTIPLE ROLLOVERS
+
+      d3.selectAll("#small-multiples .area").on("mousemove", function(d, i) {
+
+        var mouse = d3.mouse(d3.select("html")[0][0]);
+        //var mouseDate = poolChart.xScale.invert(mouse[0]); // TODO TODO TODO :)
+        //var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= (+mouseDate); });
+
+        // highlight corresponding small multiple
+        var poolName = d3.select(this.parentNode.parentNode.parentNode).attr("data-pool");
+        d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", true);
+
+      });
+
+      // clear hover info and restore normal axes on mouseout
+      d3.selectAll("#small-multiples .area").on("mouseout", function() {
+        var poolName = d3.select(this.parentNode.parentNode.parentNode).attr("data-pool");
+        d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", false);
+      });
 
     });
 

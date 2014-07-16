@@ -306,6 +306,10 @@ function barChart() {
     return chart;
   };
 
+  chart.xScale = function() {
+    return xScale;
+  }
+
   return chart;
 
 }

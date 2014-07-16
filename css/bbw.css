@@ -249,11 +249,11 @@ path.arrow, polyline.arrow {
   stroke-width: 0.5;
 }
 
-#stacked-area .area:hover {
+#stacked-area .area:hover, #stacked-area .active .area {
   fill: black;
 }
 
-#small-multiples .active .area {
+#small-multiples .area:hover, #small-multiples .active .area {
   fill: black;
 }
 
