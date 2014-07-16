@@ -190,6 +190,11 @@ function timeSeriesChart() {
         g.select(".x.axis")
             .call(xAxis);
 
+        if(yScale.domain.function) yScale.domain(yScale.domain.function(data));
+        yAxis.tickValues(yScale.domain());
+        if(heightFunction) height = heightFunction(data);
+        yScale.range([height - margin.top - margin.bottom, 0]);
+
         g.select(".y.axis")
             .call(yAxis);
 
@@ -207,6 +212,12 @@ function timeSeriesChart() {
 
         // Update the y-axis.
         var dateData = _.find(data.values, function(datapoint) { return +datapoint.date >= (+x); });
+
+        if(yScale.domain.function) yScale.domain(yScale.domain.function(data));
+        yAxis.tickValues(yScale.domain());
+        if(heightFunction) height = heightFunction(data);
+        yScale.range([height - margin.top - margin.bottom, 0]);
+
         yAxisCrosshairs = d3.svg.axis()
             .scale(yScale)
             .orient("left")
