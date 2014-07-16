@@ -15,8 +15,6 @@ function timeSeriesChart() {
       line = d3.svg.line().x(X).y(Y);
 
   function chart(selection) {
-    console.log("here toph :)");
-    console.log(selection);
     selection.each(function(data) {
 
       chart.metadata = data;
@@ -181,9 +179,7 @@ function timeSeriesChart() {
   }
 
   chart.crosshairs = function(selection, x) {
-    // TODO :)
     // redraw only axes with tick at point x and corresponding point y
-    console.log(selection);
     selection.each(function(data) {
 
       g = d3.select(this).select("g");
@@ -193,6 +189,9 @@ function timeSeriesChart() {
         // reset to normal axis
         g.select(".x.axis")
             .call(xAxis);
+
+        g.select(".y.axis")
+            .call(yAxis);
 
       } else {
 
@@ -207,9 +206,15 @@ function timeSeriesChart() {
             .call(xAxisCrosshairs);
 
         // Update the y-axis.
-        // g.select(".y.axis")
-        //     .attr("transform", "translate(0,0)")
-        //     .call(yAxis);
+        var dateData = _.find(data.values, function(datapoint) { return +datapoint.date >= (+x); });
+        yAxisCrosshairs = d3.svg.axis()
+            .scale(yScale)
+            .orient("left")
+            .tickSize(6, 0)
+            .tickValues([dateData.percentage])
+            .tickFormat(d3.format(".0%"));
+        g.select(".y.axis")
+            .call(yAxisCrosshairs);
 
       }
 

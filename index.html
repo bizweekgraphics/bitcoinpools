@@ -333,10 +333,14 @@ font-family:BWHaasRegular
       d3.selectAll("#small-multiples svg").on("mouseout", function() {
 
         // reset axes
-        var smallMultiple = d3.select(this.parentNode);
-        var smData = smallMultiple.data();
-        smallMultiple
-            .data(smData)
+        // var smallMultiple = d3.select(this.parentNode);
+        // var smData = smallMultiple.data();
+        // smallMultiple
+        //     .data(smData)
+        //     .call(poolChart.crosshairs, false);
+
+        d3.select("#small-multiples").selectAll("div.small-multiple")
+            .data(poolstack)
             .call(poolChart.crosshairs, false);
 
         // unhighlight
