@@ -66,7 +66,7 @@ font-family:BWHaasRegular
 
   <script>
 
-    // breakout setup
+    // SMALL MULTIPLE SETUP
 
     var poolChart = timeSeriesChart()
         .dataAccessor("values")
@@ -215,9 +215,9 @@ font-family:BWHaasRegular
         .classed("tooltip", true)
         .style("display", "none");
 
-      // breakouts
+      // SMALL MULTIPLES
 
-      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.breakout")
+      var smallMultiplesEnter = d3.select("#small-multiples").selectAll("div.small-multiple")
           .data(poolstack)
         .enter()
           .append("div")
@@ -310,14 +310,18 @@ font-family:BWHaasRegular
       d3.selectAll("#small-multiples .area").on("mousemove", function(d, i) {
 
         var mouse = d3.mouse(this);
-        // console.log(poolChart.xScale());
         var mouseDate = poolChart.xScale().invert(mouse[0]); // TODO TODO TODO :)
-        console.log(mouseDate);
-        //var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= (+mouseDate); });
+        var dateData = _.find(d, function(datapoint) { return +datapoint[0] >= (+mouseDate); });
 
-        // highlight corresponding small multiple
-        var poolName = d3.select(this.parentNode.parentNode.parentNode).attr("data-pool");
-        d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", true);
+        var smallMultiple = d3.select(this.parentNode.parentNode.parentNode);
+        var smData = smallMultiple.data();
+
+        poolChart.xAxisTickValues([mouseDate]);
+        smallMultiple.data(smData)
+          .call(poolChart);
+
+        // highlight corresponding stacked area
+        d3.select('#stacked-area [data-pool="'+ smData[0].name +'"]').classed("active", true);
 
       });
 

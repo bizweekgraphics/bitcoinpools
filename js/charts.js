@@ -170,6 +170,11 @@ function timeSeriesChart() {
     return xScale;
   };
 
+  chart.xAxisTickValues = function(_) {
+    xAxis.tickValues(_);
+    return chart;
+  }
+
   return chart;
 }
 
