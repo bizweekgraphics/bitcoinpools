@@ -253,7 +253,7 @@ path.arrow, polyline.arrow {
   fill: black;
 }
 
-#small-multiples .area:hover, #small-multiples .active .area {
+#small-multiples svg:hover .area, #small-multiples .active .area {
   fill: black;
 }
 

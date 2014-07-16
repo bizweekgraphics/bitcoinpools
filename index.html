@@ -307,18 +307,24 @@ font-family:BWHaasRegular
 
       // SMALL MULTIPLE ROLLOVERS
 
-      d3.selectAll("#small-multiples .area").on("mousemove", function(d, i) {
+      d3.selectAll("#small-multiples svg").on("mousemove", function(d, i) {
 
         var mouse = d3.mouse(this);
-        var mouseDate = poolChart.xScale().invert(mouse[0]); // TODO TODO TODO :)
+        var mouseDate = poolChart.xScale().invert(mouse[0]-poolChart.margin().left);
         var dateData = _.find(d, function(datapoint) { return +datapoint[0] >= (+mouseDate); });
 
-        var smallMultiple = d3.select(this.parentNode.parentNode.parentNode);
+        var smallMultiple = d3.select(this.parentNode);
         var smData = smallMultiple.data();
 
-        poolChart.xAxisTickValues([mouseDate]);
+        poolChart.xAxis(poolChart.xAxis().tickValues([mouseDate]).tickFormat(formatDateLong));
         smallMultiple.data(smData)
           .call(poolChart);
+
+        console.log(mouseDate);
+
+        // d3.select("#small-multiples").selectAll("div.small-multiple")
+        //     .data(poolstack)
+        //     .call(poolChart);
 
         // highlight corresponding stacked area
         d3.select('#stacked-area [data-pool="'+ smData[0].name +'"]').classed("active", true);
@@ -326,8 +332,8 @@ font-family:BWHaasRegular
       });
 
       // clear hover info and restore normal axes on mouseout
-      d3.selectAll("#small-multiples .area").on("mouseout", function() {
-        var poolName = d3.select(this.parentNode.parentNode.parentNode).attr("data-pool");
+      d3.selectAll("#small-multiples svg").on("mouseout", function() {
+        var poolName = d3.select(this.parentNode).attr("data-pool");
         d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", false);
       });
 
