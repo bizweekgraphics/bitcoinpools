@@ -15,6 +15,8 @@ function timeSeriesChart() {
       line = d3.svg.line().x(X).y(Y);
 
   function chart(selection) {
+    console.log("here toph :)");
+    console.log(selection);
     selection.each(function(data) {
 
       chart.metadata = data;
@@ -178,9 +180,41 @@ function timeSeriesChart() {
     return chart;
   }
 
-  chart.crosshairs = function(x) {
+  chart.crosshairs = function(selection, x) {
     // TODO :)
     // redraw only axes with tick at point x and corresponding point y
+    console.log(selection);
+    selection.each(function(data) {
+
+      g = d3.select(this).select("g");
+
+      if(x === false) {
+
+        // reset to normal axis
+        g.select(".x.axis")
+            .call(xAxis);
+
+      } else {
+
+        // Update the x-axis.
+        xAxisCrosshairs = d3.svg.axis()
+            .scale(xScale)
+            .orient("bottom")
+            .tickSize(6, 0)
+            .tickValues([x])
+            .tickFormat(d3.time.format("%b. %d, %Y"));
+        g.select(".x.axis")
+            .call(xAxisCrosshairs);
+
+        // Update the y-axis.
+        // g.select(".y.axis")
+        //     .attr("transform", "translate(0,0)")
+        //     .call(yAxis);
+
+      }
+
+    });
+
     return chart;
   }
 

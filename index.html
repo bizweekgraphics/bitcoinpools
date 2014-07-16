@@ -316,11 +316,9 @@ font-family:BWHaasRegular
         var smallMultiple = d3.select(this.parentNode);
         var smData = smallMultiple.data();
 
-        poolChart.xAxis(poolChart.xAxis().tickValues([mouseDate]).tickFormat(formatDateLong));
-        smallMultiple.data(smData)
-          .call(poolChart);
-
-        console.log(mouseDate);
+        smallMultiple
+            .data(smData)
+            .call(poolChart.crosshairs, mouseDate);
 
         // d3.select("#small-multiples").selectAll("div.small-multiple")
         //     .data(poolstack)
@@ -333,6 +331,15 @@ font-family:BWHaasRegular
 
       // clear hover info and restore normal axes on mouseout
       d3.selectAll("#small-multiples svg").on("mouseout", function() {
+
+        // reset axes
+        var smallMultiple = d3.select(this.parentNode);
+        var smData = smallMultiple.data();
+        smallMultiple
+            .data(smData)
+            .call(poolChart.crosshairs, false);
+
+        // unhighlight
         var poolName = d3.select(this.parentNode).attr("data-pool");
         d3.select('#stacked-area [data-pool="'+poolName+'"]').classed("active", false);
       });
