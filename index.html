@@ -309,8 +309,10 @@ font-family:BWHaasRegular
 
       d3.selectAll("#small-multiples .area").on("mousemove", function(d, i) {
 
-        var mouse = d3.mouse(d3.select("html")[0][0]);
-        //var mouseDate = poolChart.xScale.invert(mouse[0]); // TODO TODO TODO :)
+        var mouse = d3.mouse(this);
+        // console.log(poolChart.xScale());
+        var mouseDate = poolChart.xScale().invert(mouse[0]); // TODO TODO TODO :)
+        console.log(mouseDate);
         //var dateData = _.find(d.values, function(datapoint) { return +datapoint.date >= (+mouseDate); });
 
         // highlight corresponding small multiple

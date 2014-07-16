@@ -166,6 +166,10 @@ function timeSeriesChart() {
     return chart;
   };
 
+  chart.xScale = function() {
+    return xScale;
+  };
+
   return chart;
 }
 
@@ -305,10 +309,6 @@ function barChart() {
     yScale.domain.overridden = true;
     return chart;
   };
-
-  chart.xScale = function() {
-    return xScale;
-  }
 
   return chart;
 
