@@ -316,13 +316,13 @@ font-family:BWHaasRegular
         var smallMultiple = d3.select(this.parentNode);
         var smData = smallMultiple.data();
 
-        smallMultiple
-            .data(smData)
-            .call(poolChart.crosshairs, mouseDate);
+        // smallMultiple
+        //     .data(smData)
+        //     .call(poolChart.crosshairs, mouseDate);
 
-        // d3.select("#small-multiples").selectAll("div.small-multiple")
-        //     .data(poolstack)
-        //     .call(poolChart);
+        d3.select("#small-multiples").selectAll("div.small-multiple")
+            .data(poolstack)
+            .call(poolChart.crosshairs, mouseDate);
 
         // highlight corresponding stacked area
         d3.select('#stacked-area [data-pool="'+ smData[0].name +'"]').classed("active", true);
